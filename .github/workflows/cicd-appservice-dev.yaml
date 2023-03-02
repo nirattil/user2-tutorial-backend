@@ -65,7 +65,6 @@ jobs:
     - name: Autobuild
       uses: github/codeql-action/autobuild@v2
 
-
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
 
@@ -73,7 +72,24 @@ jobs:
     # - name: Quality Gate Check
     #   uses: <owner>/quality-gate-action@main
     #   with:
-    #     repository: <owner>/<this-repos-name>
+    #     repository: <owner>/xxx-xxxxxx
     #     severity: high
     #   env:
     #     GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+
+  repo-dispatch:
+    name: Repository Dispatch
+    runs-on: ubuntu-latest
+    needs: [unitest,analyze]
+    environment:
+      name: dev
+      url: https://github.com/nirattil/user2-tutorial-backend/actions/workflows/dev-tutorial-backend-deploy.yml
+
+    steps:
+    - name: Repository Dispatch
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.WORKFLOW_TOKEN }}
+        repository: nirattil/user2-pipeline
+        event-type: user2-tutorial-backend-cd-dev
+        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
